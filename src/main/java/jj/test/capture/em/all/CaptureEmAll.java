@@ -15,7 +15,7 @@ public class CaptureEmAll {
 
     public static void main(final String[] args) throws Exception {
         final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(CaptureEmAll.class);
-        final ArgumentParser parser = context.getBean(ArgumentParser.class);
+        final ArgumentParser parser = new ArgumentParser(System.out);
 
         final long startTime = System.currentTimeMillis();
         final List<Transaction> transactions = parser.parse(args);
