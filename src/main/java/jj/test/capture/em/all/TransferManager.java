@@ -1,7 +1,6 @@
 package jj.test.capture.em.all;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,6 @@ public class TransferManager {
     }
 
     private void printInvalidTransactions(final List<Transaction> invalidTransactions) {
-        System.out.println(Arrays.toString(invalidTransactions.toArray()));
         invalidTransactions.forEach(transaction -> {
             printer.format("Invalid source=%s\n", transaction.getSource());
         });
