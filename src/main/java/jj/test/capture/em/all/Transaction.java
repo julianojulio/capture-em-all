@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 public class Transaction {
 
@@ -96,5 +97,27 @@ public class Transaction {
 
     public String getFilename() {
         return FilenameUtils.getName(source);
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Transaction)) return false;
+        final Transaction that = (Transaction) other;
+        return Objects.equals(source, that.source) &&
+                Objects.equals(outputFolder, that.outputFolder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source, outputFolder);
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "source='" + source + '\'' +
+                ", outputFolder='" + outputFolder + '\'' +
+                '}';
     }
 }

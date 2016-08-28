@@ -15,8 +15,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
 
-public class Sftp {
+public class Sftp implements KnownProtocol {
 
     public Transfer transfer(final Transaction transaction) {
         final JSch jsch = new JSch();
@@ -25,10 +27,10 @@ public class Sftp {
             final Session session = jsch.getSession(transaction.getUsername(), transaction.getHost(), transaction.getPort(22));
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(transaction.getPassword());
-            session.connect(5000);
+            session.connect();
 
             final Channel channel = session.openChannel("sftp");
-            channel.connect(5000);
+            channel.connect();
 
             final ChannelSftp sftpChannel = (ChannelSftp) channel;
             final long size = sftpChannel.lstat(transaction.getPath()).getSize();
@@ -49,5 +51,10 @@ public class Sftp {
         } catch (final JSchException | SftpException | IOException e) {
             return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
         }
+    }
+
+    @Override
+    public List<String> getKnownProtocols() {
+        return Collections.singletonList("sftp");
     }
 }

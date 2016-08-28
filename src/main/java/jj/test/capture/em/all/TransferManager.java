@@ -1,12 +1,15 @@
 package jj.test.capture.em.all;
 
-import com.google.common.collect.ImmutableMap;
+import jj.test.capture.em.all.protocol.ApacheCommonsIO;
+import jj.test.capture.em.all.protocol.KnownProtocol;
 import jj.test.capture.em.all.protocol.Sftp;
 
 import java.io.Closeable;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -14,9 +17,8 @@ import java.util.stream.Collectors;
 
 public class TransferManager implements Closeable {
     private final PrintStream printer;
-    private final int concurrentThreads;
     private final ExecutorService executorService;
-    private static final ImmutableMap<String, Sftp> TRANSFER_HANDLERS = ImmutableMap.of("sftp", new Sftp());
+    private final List<KnownProtocol> knownProtocols;
 
     private final List<Future<Transfer>> transfers = new ArrayList<>();
 
@@ -28,35 +30,53 @@ public class TransferManager implements Closeable {
     }
 
     public TransferManager(final PrintStream printer, final int concurrentThreads) {
-        this.printer = printer;
-        this.concurrentThreads = concurrentThreads;
+        this(
+                printer,
+                concurrentThreads,
+                Arrays.asList(
+                        new Sftp(),
+                        new ApacheCommonsIO()
+                )
+        );
+    }
 
-        executorService = Executors.newFixedThreadPool(10);
+    public TransferManager(final PrintStream printer, final int concurrentThreads, final List<KnownProtocol> knownProtocols) {
+        this.printer = printer;
+        this.knownProtocols = knownProtocols;
+        executorService = Executors.newFixedThreadPool(concurrentThreads);
+    }
+
+    public Optional<KnownProtocol> getKnownProtocol(final String protocol) {
+        return knownProtocols
+                .stream()
+                .filter(knownProtocol -> knownProtocol.getKnownProtocols().stream().anyMatch(protocol::equalsIgnoreCase))
+                .findFirst();
     }
 
     public void captureEmAll(final List<Transaction> transactions) {
         extractCandidates(transactions)
-                .forEach(transaction -> {
-                    if (TRANSFER_HANDLERS.containsKey(transaction.getProtocol())) {
-                        transfers.add(
-                                executorService.submit(() -> TRANSFER_HANDLERS.get(transaction.getProtocol()).transfer(transaction))
-                        );
-                    }
-                });
+                .forEach(transaction ->
+                        getKnownProtocol(transaction.getProtocol())
+                                .ifPresent(
+                                        knownProtocol -> transfers.add(
+                                                executorService.submit(() -> knownProtocol.transfer(transaction))
+                                        )
+                                )
+                );
     }
 
     protected List<Transaction> extractCandidates(final List<Transaction> transactions) {
-        final List<Transaction> invalidTransactions = filterInvalidSources(transactions);
-        final List<Transaction> invalidProtocols = filterUnknownProtocols(
+        final List<Transaction> invalidTransactions = getInvalidSources(transactions);
+        final List<Transaction> unknownProtocols = getUnknownProtocols(
                 transactions.stream().filter(transaction -> !invalidTransactions.contains(transaction)).collect(Collectors.toList())
         );
 
         print(invalidTransactions, "Invalid source=%s\n");
-        print(invalidProtocols, "Unknown protocol=%s\n");
+        print(unknownProtocols, "Unknown protocol=%s\n");
 
         return transactions
                 .stream()
-                .filter(transaction -> !invalidTransactions.contains(transaction) || !invalidProtocols.contains(transaction))
+                .filter(transaction -> (!invalidTransactions.contains(transaction) && !unknownProtocols.contains(transaction)))
                 .collect(Collectors.toList());
     }
 
@@ -64,14 +84,14 @@ public class TransferManager implements Closeable {
         transactions.forEach(transaction -> printer.format(message, transaction.getSource()));
     }
 
-    private List<Transaction> filterInvalidSources(final List<Transaction> transactions) {
+    protected List<Transaction> getInvalidSources(final List<Transaction> transactions) {
         return transactions.stream().filter(Transaction::isNotValid).collect(Collectors.toList());
     }
 
-    private List<Transaction> filterUnknownProtocols(final List<Transaction> transactions) {
+    protected List<Transaction> getUnknownProtocols(final List<Transaction> transactions) {
         return transactions
                 .stream()
-                .filter(transaction -> !TRANSFER_HANDLERS.containsKey(transaction.getProtocol()))
+                .filter(transaction -> !getKnownProtocol(transaction.getProtocol()).isPresent())
                 .collect(Collectors.toList());
     }
 
