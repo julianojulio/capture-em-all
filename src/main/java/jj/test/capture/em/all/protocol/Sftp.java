@@ -25,10 +25,10 @@ public class Sftp {
             final Session session = jsch.getSession(transaction.getUsername(), transaction.getHost(), transaction.getPort(22));
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(transaction.getPassword());
-            session.connect();
+            session.connect(5000);
 
             final Channel channel = session.openChannel("sftp");
-            channel.connect();
+            channel.connect(5000);
 
             final ChannelSftp sftpChannel = (ChannelSftp) channel;
             final long size = sftpChannel.lstat(transaction.getPath()).getSize();
@@ -47,7 +47,6 @@ public class Sftp {
 
             return new Transfer(size, copiedBytes, Transfer.Status.FINISHED);
         } catch (final JSchException | SftpException | IOException e) {
-            e.printStackTrace();
             return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
         }
     }

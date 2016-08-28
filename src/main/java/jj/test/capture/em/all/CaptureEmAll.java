@@ -22,11 +22,13 @@ public class CaptureEmAll {
         final long startTime = System.currentTimeMillis();
         final List<Transaction> transactions = parser.parse(args);
 
-        final TransferManager transferManager = new TransferManager(printer);
-        transferManager.captureEmAll(transactions);
+        try (final TransferManager transferManager = new TransferManager(printer)) {
+            transferManager.captureEmAll(transactions);
 
-        while (transferManager.inProgress()) {
-            TimeUnit.SECONDS.sleep(1);
+            while (!transferManager.isDone()) {
+                TimeUnit.SECONDS.sleep(1);
+                printer.println("Waiting 1 sec");
+            }
         }
 
         final long elapsedSeconds = TimeUnit.SECONDS.convert(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
