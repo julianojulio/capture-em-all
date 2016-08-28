@@ -1,6 +1,8 @@
 package jj.test.capture.em.all;
 
 import jj.test.capture.em.all.cli.ArgumentParser;
+import jj.test.capture.em.all.core.Transaction;
+import jj.test.capture.em.all.core.TransferManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package jj.test.capture.em.all;
+package jj.test.capture.em.all.core;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;

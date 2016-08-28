@@ -1,4 +1,4 @@
-package jj.test.capture.em.all;
+package jj.test.capture.em.all.core;
 
 public class Transfer {
 

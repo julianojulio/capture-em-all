@@ -1,5 +1,6 @@
-package jj.test.capture.em.all;
+package jj.test.capture.em.all.core;
 
+import jj.test.capture.em.all.core.Transaction;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

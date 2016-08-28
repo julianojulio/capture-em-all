@@ -1,6 +1,6 @@
 package jj.test.capture.em.all.cli;
 
-import jj.test.capture.em.all.Transaction;
+import jj.test.capture.em.all.core.Transaction;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;

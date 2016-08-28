@@ -6,8 +6,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import jj.test.capture.em.all.Transaction;
-import jj.test.capture.em.all.Transfer;
+import jj.test.capture.em.all.core.Transaction;
+import jj.test.capture.em.all.core.Transfer;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedOutputStream;

@@ -1,8 +1,8 @@
 package jj.test.capture.em.all.protocol;
 
 import com.google.common.collect.ImmutableMap;
-import jj.test.capture.em.all.Transaction;
-import jj.test.capture.em.all.Transfer;
+import jj.test.capture.em.all.core.Transaction;
+import jj.test.capture.em.all.core.Transfer;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.common.file.FileSystemView;

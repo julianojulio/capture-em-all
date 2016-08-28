@@ -1,4 +1,4 @@
-package jj.test.capture.em.all;
+package jj.test.capture.em.all.core;
 
 import jj.test.capture.em.all.protocol.ApacheCommonsIO;
 import jj.test.capture.em.all.protocol.KnownProtocol;

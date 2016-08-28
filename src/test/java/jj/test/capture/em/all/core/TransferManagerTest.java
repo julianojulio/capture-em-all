@@ -1,6 +1,9 @@
-package jj.test.capture.em.all;
+package jj.test.capture.em.all.core;
 
 import com.google.common.collect.ImmutableList;
+import jj.test.capture.em.all.core.Transaction;
+import jj.test.capture.em.all.core.Transfer;
+import jj.test.capture.em.all.core.TransferManager;
 import jj.test.capture.em.all.protocol.KnownProtocol;
 import org.testng.annotations.Test;
 
