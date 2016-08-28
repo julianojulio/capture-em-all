@@ -67,8 +67,7 @@ public class SftpTest {
         final Transfer transfer = new Sftp().transfer(new Transaction("sftp://login:password@localhost:22000/true-story.png"));
 
         assertThat(transfer).isEqualToComparingFieldByField(
-                new Transfer(130093L, 130093L, Transfer.Status.FINISHED)
+                new Transfer(130093L, 130093L, Transfer.Status.FINISHED, "sftp://login:password@localhost:22000/true-story.png")
         );
     }
-
 }

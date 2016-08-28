@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -102,5 +103,15 @@ public class TransferManager implements Closeable {
     @Override
     public void close() {
         executorService.shutdown();
+    }
+
+    public List<Transfer> getResults() {
+        return transfers.stream().map(transferFuture -> {
+            try {
+                return transferFuture.get();
+            } catch (final InterruptedException | ExecutionException e) {
+                return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
+            }
+        }).collect(Collectors.toList());
     }
 }

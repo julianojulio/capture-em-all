@@ -38,18 +38,22 @@ public class Sftp implements KnownProtocol {
             Files.createDirectories(transaction.getOutputPath());
 
             final InputStream inputStream = sftpChannel.get(transaction.getPath());
+            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(transaction.getDestination()));
             final long copiedBytes = IOUtils.copyLarge(
                     inputStream,
-                    new BufferedOutputStream(new FileOutputStream(transaction.getDestination()))
+                    outputStream
             );
             inputStream.close();
+            outputStream.close();
 
             sftpChannel.exit();
             session.disconnect();
 
-            return new Transfer(size, copiedBytes, Transfer.Status.FINISHED);
+            return new Transfer(size, copiedBytes, Transfer.Status.FINISHED, transaction.getSource());
         } catch (final JSchException | SftpException | IOException e) {
-            return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
+            return new Transfer(-1, -1, Transfer.Status.ERROR,
+                    String.format("Error transferring %s: %s\n", transaction.getSource(), e.getMessage())
+            );
         }
     }
 

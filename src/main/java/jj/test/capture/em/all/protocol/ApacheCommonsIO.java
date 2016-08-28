@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -31,14 +32,20 @@ public class ApacheCommonsIO implements KnownProtocol {
             final URLConnection urlConnection = transaction.getUri().toURL().openConnection();
             final int contentLength = urlConnection.getContentLength();
 
+            final InputStream inputStream = urlConnection.getInputStream();
+            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(transaction.getDestination()));
             final long copiedBytes = IOUtils.copyLarge(
-                    urlConnection.getInputStream(),
-                    new BufferedOutputStream(new FileOutputStream(transaction.getDestination()))
+                    inputStream,
+                    outputStream
             );
+            inputStream.close();
+            outputStream.close();
 
-            return new Transfer(contentLength, copiedBytes, Transfer.Status.FINISHED);
+            return new Transfer(contentLength, copiedBytes, Transfer.Status.FINISHED, transaction.getSource());
         } catch (final IOException e) {
-            return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
+            return new Transfer(-1, -1, Transfer.Status.ERROR,
+                    String.format("Error transferring %s: %s\n", transaction.getSource(), e.getMessage())
+            );
         }
     }
 }
