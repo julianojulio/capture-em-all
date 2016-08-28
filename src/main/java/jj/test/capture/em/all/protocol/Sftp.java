@@ -8,9 +8,11 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import jj.test.capture.em.all.core.Transaction;
 import jj.test.capture.em.all.core.Transfer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +40,9 @@ public class Sftp implements KnownProtocol {
             Files.createDirectories(transaction.getOutputPath());
 
             final InputStream inputStream = sftpChannel.get(transaction.getPath());
-            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(transaction.getDestination()));
+            final File tempFile = File.createTempFile("capture-em-all_", transaction.getProtocol());
+
+            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile));
             final long copiedBytes = IOUtils.copyLarge(
                     inputStream,
                     outputStream
@@ -48,6 +52,10 @@ public class Sftp implements KnownProtocol {
 
             sftpChannel.exit();
             session.disconnect();
+
+            // copy file to final destination
+            FileUtils.moveFile(tempFile, transaction.getDestination());
+
 
             return new Transfer(size, copiedBytes, Transfer.Status.FINISHED, transaction.getSource());
         } catch (final JSchException | SftpException | IOException e) {

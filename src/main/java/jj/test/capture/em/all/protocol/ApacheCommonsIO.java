@@ -2,9 +2,11 @@ package jj.test.capture.em.all.protocol;
 
 import jj.test.capture.em.all.core.Transaction;
 import jj.test.capture.em.all.core.Transfer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,13 +35,18 @@ public class ApacheCommonsIO implements KnownProtocol {
             final int contentLength = urlConnection.getContentLength();
 
             final InputStream inputStream = urlConnection.getInputStream();
-            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(transaction.getDestination()));
+            final File tempFile = File.createTempFile("capture-em-all_", transaction.getProtocol());
+
+            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile));
             final long copiedBytes = IOUtils.copyLarge(
                     inputStream,
                     outputStream
             );
             inputStream.close();
             outputStream.close();
+
+            // copy file to final destination
+            FileUtils.moveFile(tempFile, transaction.getDestination());
 
             return new Transfer(contentLength, copiedBytes, Transfer.Status.FINISHED, transaction.getSource());
         } catch (final IOException e) {
