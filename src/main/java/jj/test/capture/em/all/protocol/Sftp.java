@@ -14,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 public class Sftp {
 
@@ -21,28 +22,32 @@ public class Sftp {
         final JSch jsch = new JSch();
 
         try {
-            final Session session = jsch.getSession("username", "127.0.0.1", 22);
+            final Session session = jsch.getSession(transaction.getUsername(), transaction.getHost(), transaction.getPort(22));
             session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword("password");
+            session.setPassword(transaction.getPassword());
             session.connect();
 
             final Channel channel = session.openChannel("sftp");
             channel.connect();
 
             final ChannelSftp sftpChannel = (ChannelSftp) channel;
-            final InputStream inputStream = sftpChannel.get(transaction.getSource());
-
             final long size = sftpChannel.lstat(transaction.getPath()).getSize();
+
+            Files.createDirectories(transaction.getOutputPath());
+
+            final InputStream inputStream = sftpChannel.get(transaction.getPath());
             final long copiedBytes = IOUtils.copyLarge(
                     inputStream,
                     new BufferedOutputStream(new FileOutputStream(transaction.getDestination()))
             );
+            inputStream.close();
 
             sftpChannel.exit();
             session.disconnect();
 
             return new Transfer(size, copiedBytes, Transfer.Status.FINISHED);
         } catch (final JSchException | SftpException | IOException e) {
+            e.printStackTrace();
             return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
         }
     }

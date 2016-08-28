@@ -3,18 +3,27 @@ package jj.test.capture.em.all;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Transaction {
 
     private final String source;
+    private final String outputFolder;
 
     public Transaction(final String source) {
-        this.source = source;
+        this(source, "download");
     }
 
-    public String getDestination() {
+    public Transaction(final String source, final String outputFolder) {
+        this.source = source;
+        this.outputFolder = outputFolder;
+    }
+
+    public String getOutputFolder() {
         return FilenameUtils.getName(source);
     }
 
@@ -44,5 +53,48 @@ public class Transaction {
 
     public boolean isNotValid() {
         return !isValid();
+    }
+
+    public String getUsername() {
+        try {
+            return getUri().getUserInfo().split(":")[0];
+        } catch (final Exception e) {
+            return "";
+        }
+    }
+
+    public String getPassword() {
+        try {
+            return getUri().getUserInfo().split(":")[1];
+        } catch (final Exception e) {
+            return "";
+        }
+    }
+
+    public String getHost() {
+        return getUri().getHost();
+    }
+
+    public int getPort() {
+        return getUri().getPort();
+    }
+
+    /**
+     * Returns the Port number, if not specified, then returns the given parameter.
+     */
+    public int getPort(final int defaultIfNotSpecified) {
+        return getPort() > 0 ? getPort() : defaultIfNotSpecified;
+    }
+
+    public Path getOutputPath() {
+        return Paths.get(outputFolder);
+    }
+
+    public File getDestination() {
+        return getOutputPath().resolve(getFilename()).toFile();
+    }
+
+    public String getFilename() {
+        return FilenameUtils.getName(source);
     }
 }

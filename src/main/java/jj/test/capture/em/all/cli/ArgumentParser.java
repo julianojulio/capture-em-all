@@ -28,7 +28,10 @@ public class ArgumentParser {
     public List<Transaction> parse(final String... args) {
         try {
             final CommandLine line = parser.parse(options, args);
-            final List<Transaction> transactions = line.getArgList().stream().map(Transaction::new).collect(Collectors.toList());
+
+            final String outputFolder = line.hasOption('o') ? line.getOptionValue('o') : "download";
+            final List<Transaction> transactions =
+                    line.getArgList().stream().map(source -> new Transaction(source, outputFolder)).collect(Collectors.toList());
 
             if (transactions.isEmpty()) {
                 printHelpMessage("No transactions provided.");

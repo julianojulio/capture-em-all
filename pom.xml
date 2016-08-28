@@ -93,5 +93,13 @@
             <version>3.5.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- In memory SFTPD -->
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-sftp</artifactId>
+            <version>0.11.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
