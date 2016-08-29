@@ -1,17 +1,11 @@
 package jj.test.capture.em.all.protocol;
 
 import jj.test.capture.em.all.core.Transaction;
-import jj.test.capture.em.all.core.Transfer;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import jj.test.capture.em.all.core.TransactionException;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,40 +13,48 @@ import java.util.List;
  * This is a default implementation for multiple protocols, using Apache Commons IO.
  * It supports HTTP, HTTPS and FTP.
  */
-public class ApacheCommonsIO implements KnownProtocol {
+public class ApacheCommonsIO implements Protocol {
+
+    public ApacheCommonsIO.ApacheCommonsIOTransfer newTransfer(final Transaction transaction) {
+        return new ApacheCommonsIO.ApacheCommonsIOTransfer(transaction);
+    }
 
     @Override
     public List<String> getKnownProtocols() {
         return Arrays.asList("http", "https", "ftp", "file");
     }
 
-    @Override
-    public Transfer transfer(final Transaction transaction) {
-        try {
-            Files.createDirectories(transaction.getOutputPath());
 
-            final URLConnection urlConnection = transaction.getUri().toURL().openConnection();
-            final int contentLength = urlConnection.getContentLength();
+    public static class ApacheCommonsIOTransfer extends BaseTransfer {
 
-            final InputStream inputStream = urlConnection.getInputStream();
-            final File tempFile = File.createTempFile("capture-em-all_", transaction.getProtocol());
+        private URLConnection urlConnection;
 
-            final BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(tempFile));
-            final long copiedBytes = IOUtils.copyLarge(
-                    inputStream,
-                    outputStream
-            );
-            inputStream.close();
-            outputStream.close();
+        public ApacheCommonsIOTransfer(final Transaction transaction) {
+            super(transaction);
 
-            // copy file to final destination
-            FileUtils.moveFile(tempFile, transaction.getDestination());
+            try {
+                urlConnection = transaction.getUri().toURL().openConnection();
+            } catch (final IOException e) {
+                throw new TransactionException("Error open connection with: " + transaction.getSource(), e);
+            }
+        }
 
-            return new Transfer(contentLength, copiedBytes, Transfer.Status.FINISHED, transaction.getSource());
-        } catch (final IOException e) {
-            return new Transfer(-1, -1, Transfer.Status.ERROR,
-                    String.format("Error transferring %s: %s\n", transaction.getSource(), e.getMessage())
-            );
+        @Override
+        InputStream openInputStream(final String path) {
+            try {
+                return urlConnection.getInputStream();
+            } catch (final IOException e) {
+                throw new TransactionException("Error open connection with: " + transaction.getSource(), e);
+            }
+        }
+
+        @Override
+        long getSize() {
+            return urlConnection.getContentLength();
+        }
+
+        @Override
+        void close() {
         }
     }
 }

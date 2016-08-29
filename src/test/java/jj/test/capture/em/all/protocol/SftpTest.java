@@ -2,7 +2,7 @@ package jj.test.capture.em.all.protocol;
 
 import com.google.common.collect.ImmutableMap;
 import jj.test.capture.em.all.core.Transaction;
-import jj.test.capture.em.all.core.Transfer;
+import jj.test.capture.em.all.core.TransferStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.Session;
@@ -71,12 +71,12 @@ public class SftpTest {
     }
 
     public void test_download() {
-        final Transfer transfer = new Sftp().transfer(
-                new Transaction("sftp://login:password@localhost:22000/true-story.png", outputFolder.toString())
-        );
+        final TransferStatus transferStatus = new Sftp()
+                .newTransfer(new Transaction("sftp://login:password@localhost:22000/true-story.png", outputFolder.toString()))
+                .start();
 
-        assertThat(transfer).isEqualToComparingFieldByField(
-                new Transfer(130093L, 130093L, Transfer.Status.FINISHED, "sftp://login:password@localhost:22000/true-story.png")
+        assertThat(transferStatus).isEqualToComparingFieldByField(
+                new TransferStatus(130093L, 130093L, TransferStatus.Status.FINISHED, "sftp://login:password@localhost:22000/true-story.png")
         );
     }
 }

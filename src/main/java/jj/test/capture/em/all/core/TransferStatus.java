@@ -1,11 +1,9 @@
 package jj.test.capture.em.all.core;
 
-public class Transfer {
+public class TransferStatus {
 
     public static enum Status {
-        IN_PROGRESS,
         FINISHED,
-        CANCELED,
         ERROR
     }
 
@@ -14,14 +12,14 @@ public class Transfer {
     final Status status;
     final String feedback;
 
-    public Transfer(final long size, final long copied, final Status status, final String feedback) {
+    public TransferStatus(final long size, final long copied, final Status status, final String feedback) {
         this.size = size;
         this.copied = copied;
         this.status = status;
         this.feedback = feedback;
     }
 
-    public Transfer(final long size, final long copied, final Status status) {
+    public TransferStatus(final long size, final long copied, final Status status) {
         this(size, copied, status, "");
     }
 

@@ -1,10 +1,8 @@
 package jj.test.capture.em.all.core;
 
 import com.google.common.collect.ImmutableList;
-import jj.test.capture.em.all.core.Transaction;
-import jj.test.capture.em.all.core.Transfer;
-import jj.test.capture.em.all.core.TransferManager;
-import jj.test.capture.em.all.protocol.KnownProtocol;
+import jj.test.capture.em.all.protocol.Protocol;
+import jj.test.capture.em.all.protocol.Transfer;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -15,15 +13,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Test
 public class TransferManagerTest {
-    private final KnownProtocol httpFailTransfer = new KnownProtocol() {
+    private final Protocol httpFailTransfer = new Protocol() {
         @Override
         public List<String> getKnownProtocols() {
             return Collections.singletonList("http");
         }
 
         @Override
-        public Transfer transfer(final Transaction transaction) {
-            return new Transfer(-1, -1, Transfer.Status.ERROR, "Unit test");
+        public Transfer newTransfer(final Transaction transaction) {
+            throw new RuntimeException("Not implemented - unit test mock");
         }
     };
 

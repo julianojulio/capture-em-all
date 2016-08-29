@@ -1,7 +1,8 @@
 package jj.test.capture.em.all.core;
 
 import jj.test.capture.em.all.protocol.ApacheCommonsIO;
-import jj.test.capture.em.all.protocol.KnownProtocol;
+import jj.test.capture.em.all.protocol.Transfer;
+import jj.test.capture.em.all.protocol.Protocol;
 import jj.test.capture.em.all.protocol.Sftp;
 
 import java.io.Closeable;
@@ -19,9 +20,9 @@ import java.util.stream.Collectors;
 public class TransferManager implements Closeable {
     private final PrintStream printer;
     private final ExecutorService executorService;
-    private final List<KnownProtocol> knownProtocols;
+    private final List<Protocol> protocols;
 
-    private final List<Future<Transfer>> transfers = new ArrayList<>();
+    private final List<Future<TransferStatus>> transfers = new ArrayList<>();
 
     /**
      * Starts a TransactionManager with 10 max concurrent threads.
@@ -41,14 +42,14 @@ public class TransferManager implements Closeable {
         );
     }
 
-    public TransferManager(final PrintStream printer, final int concurrentThreads, final List<KnownProtocol> knownProtocols) {
+    public TransferManager(final PrintStream printer, final int concurrentThreads, final List<Protocol> protocols) {
         this.printer = printer;
-        this.knownProtocols = knownProtocols;
+        this.protocols = protocols;
         executorService = Executors.newWorkStealingPool(concurrentThreads);
     }
 
-    public Optional<KnownProtocol> getKnownProtocol(final String protocol) {
-        return knownProtocols
+    public Optional<Protocol> getKnownProtocol(final String protocol) {
+        return protocols
                 .stream()
                 .filter(knownProtocol -> knownProtocol.getKnownProtocols().stream().anyMatch(protocol::equalsIgnoreCase))
                 .findFirst();
@@ -61,17 +62,20 @@ public class TransferManager implements Closeable {
                                 .ifPresent(
                                         knownProtocol -> transfers.add(
                                                 executorService.submit(() -> {
-                                                    final Transfer transfer = knownProtocol.transfer(transaction);
-                                                    printFinished(transfer);
-                                                    return transfer;
+
+
+                                                    final Transfer transfer = knownProtocol.newTransfer(transaction);
+                                                    final TransferStatus transferStatus = transfer.start();
+                                                    printFinished(transferStatus);
+                                                    return transferStatus;
                                                 })
                                         )
                                 )
                 );
     }
 
-    public void printFinished(final Transfer transfer) {
-        printer.format("Complete: %s\n", transfer.getFeedback());
+    public void printFinished(final TransferStatus transferStatus) {
+        printer.format("Complete: %s\n", transferStatus.getFeedback());
     }
 
     protected List<Transaction> extractCandidates(final List<Transaction> transactions) {
@@ -113,12 +117,12 @@ public class TransferManager implements Closeable {
         executorService.shutdown();
     }
 
-    public List<Transfer> getResults() {
+    public List<TransferStatus> getResults() {
         return transfers.stream().map(transferFuture -> {
             try {
                 return transferFuture.get();
             } catch (final InterruptedException | ExecutionException e) {
-                return new Transfer(-1, -1, Transfer.Status.ERROR, e.getMessage());
+                return new TransferStatus(-1, -1, TransferStatus.Status.ERROR, e.getMessage());
             }
         }).collect(Collectors.toList());
     }
