@@ -1,0 +1,16 @@
+@startuml
+title "Capture 'Em ALL!"
+[-> CaptureEmAll: file1 file2
+activate ArgumentParser
+CaptureEmAll -> ArgumentParser: parse(args)
+CaptureEmAll <- ArgumentParser: List<Transaction>
+deactivate ArgumentParser
+
+activate TransferManager
+CaptureEmAll -> TransferManager: captureEmAll(transactions)
+
+TransferManager -> TransferManager.ExecutorService: new Transfer(protocol).start()
+TransferManager <- TransferManager.ExecutorService: TransferStatus
+
+deactivate TransferManager
+@enduml

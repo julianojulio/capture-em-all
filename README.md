@@ -25,3 +25,6 @@ Command line: `java -jar capture-em-all.jar file1 file2 -o=/downloads`
  1. Graphical User Interface
  2. Scheduler - Schedule transfers to run on a cron based expression
  3. Progress meter for the CLI - It will be better to see the download progress rather than wonder if the application halted or is working quietly
+
+# High level Sequence Diagram
+![Sequence Diagram](capture-em-all_sd.png)
