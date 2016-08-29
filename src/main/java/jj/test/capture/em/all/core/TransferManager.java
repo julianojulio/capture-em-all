@@ -1,9 +1,9 @@
 package jj.test.capture.em.all.core;
 
 import jj.test.capture.em.all.protocol.ApacheCommonsIO;
-import jj.test.capture.em.all.protocol.Transfer;
 import jj.test.capture.em.all.protocol.Protocol;
 import jj.test.capture.em.all.protocol.Sftp;
+import jj.test.capture.em.all.protocol.Transfer;
 
 import java.io.Closeable;
 import java.io.PrintStream;
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -115,15 +114,5 @@ public class TransferManager implements Closeable {
     @Override
     public void close() {
         executorService.shutdown();
-    }
-
-    public List<TransferStatus> getResults() {
-        return transfers.stream().map(transferFuture -> {
-            try {
-                return transferFuture.get();
-            } catch (final InterruptedException | ExecutionException e) {
-                return new TransferStatus(-1, -1, TransferStatus.Status.ERROR, e.getMessage());
-            }
-        }).collect(Collectors.toList());
     }
 }

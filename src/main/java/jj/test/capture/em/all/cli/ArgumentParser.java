@@ -7,6 +7,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.PrintStream;
 import java.util.Collections;
@@ -26,6 +28,11 @@ public class ArgumentParser {
     }
 
     public List<Transaction> parse(final String... args) {
+        if (ArrayUtils.isEmpty(args) || StringUtils.isAnyBlank(args)) {
+            printHelpMessage("Please specify URLs as input");
+            return Collections.emptyList();
+        }
+
         try {
             final CommandLine line = parser.parse(options, args);
 

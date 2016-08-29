@@ -19,10 +19,6 @@ public class TransferStatus {
         this.feedback = feedback;
     }
 
-    public TransferStatus(final long size, final long copied, final Status status) {
-        this(size, copied, status, "");
-    }
-
     public long getSize() {
         return size;
     }
