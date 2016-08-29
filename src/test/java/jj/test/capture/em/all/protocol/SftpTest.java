@@ -79,4 +79,8 @@ public class SftpTest {
                 new TransferStatus(130093L, 130093L, TransferStatus.Status.FINISHED, "sftp://login:password@localhost:22000/true-story.png")
         );
     }
+
+    public void test_knownProtocols() {
+        assertThat(new Sftp().getKnownProtocols()).containsOnly("sftp");
+    }
 }
