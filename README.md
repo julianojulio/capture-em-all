@@ -12,7 +12,10 @@ Supported protocols:
  - file
  
 ## How to use it
-Command line: `java -jar capture-em-all.jar file1 file2 -o=/downloads`
+Command line: 
+```bash
+java -jar capture-em-all.jar file1 file2 -o=/downloads
+```
 
 ## What can be improved
  - CI/CD is not hooked, we should create new version after a merge to master
