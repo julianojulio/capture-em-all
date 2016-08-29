@@ -2,7 +2,6 @@ package jj.test.capture.em.all;
 
 import jj.test.capture.em.all.cli.ArgumentParser;
 import jj.test.capture.em.all.core.Transaction;
-import jj.test.capture.em.all.core.Transfer;
 import jj.test.capture.em.all.core.TransferManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -30,17 +29,10 @@ public class CaptureEmAll {
 
             while (!transferManager.isDone()) {
                 TimeUnit.SECONDS.sleep(1);
-                printer.println("Waiting 1 sec");
             }
-
-            printFinished(printer, transferManager.getResults());
         }
 
         final long elapsedSeconds = TimeUnit.SECONDS.convert(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS);
         printer.println(String.format("All transactions finished in %ss", elapsedSeconds));
-    }
-
-    public static void printFinished(final PrintStream printer, List<Transfer> transfers) {
-        transfers.forEach(transfer -> printer.format("Complete: %s\n", transfer.getFeedback()));
     }
 }

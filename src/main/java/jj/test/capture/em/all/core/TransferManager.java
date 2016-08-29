@@ -44,7 +44,7 @@ public class TransferManager implements Closeable {
     public TransferManager(final PrintStream printer, final int concurrentThreads, final List<KnownProtocol> knownProtocols) {
         this.printer = printer;
         this.knownProtocols = knownProtocols;
-        executorService = Executors.newFixedThreadPool(concurrentThreads);
+        executorService = Executors.newWorkStealingPool(concurrentThreads);
     }
 
     public Optional<KnownProtocol> getKnownProtocol(final String protocol) {
@@ -60,10 +60,18 @@ public class TransferManager implements Closeable {
                         getKnownProtocol(transaction.getProtocol())
                                 .ifPresent(
                                         knownProtocol -> transfers.add(
-                                                executorService.submit(() -> knownProtocol.transfer(transaction))
+                                                executorService.submit(() -> {
+                                                    final Transfer transfer = knownProtocol.transfer(transaction);
+                                                    printFinished(transfer);
+                                                    return transfer;
+                                                })
                                         )
                                 )
                 );
+    }
+
+    public void printFinished(final Transfer transfer) {
+        printer.format("Complete: %s\n", transfer.getFeedback());
     }
 
     protected List<Transaction> extractCandidates(final List<Transaction> transactions) {
